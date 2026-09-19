@@ -10,7 +10,7 @@ services:
     name: shopkit-api
     runtime: node
     plan: free
-    rootDir: server
+    rootDir: shopkit/server
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
@@ -30,7 +30,7 @@ services:
   - type: web
     name: shopkit-client
     runtime: static
-    rootDir: client
+    rootDir: shopkit/client
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
