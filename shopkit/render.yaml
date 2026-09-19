@@ -1,0 +1,43 @@
+# Render Blueprint — creates both services in one step.
+# In Render: New → Blueprint → connect this repo. Render reads this file.
+#
+# MONGO_URI and CLIENT_URL are marked sync:false, so Render prompts you for
+# them instead of storing secrets in git. JWT_SECRET is generated for you.
+
+services:
+  # ---------- Express API ----------
+  - type: web
+    name: shopkit-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true # Render generates a strong random value
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: MONGO_URI
+        sync: false # you paste your Atlas connection string
+      - key: CLIENT_URL
+        sync: false # https://shopkit-client.onrender.com
+
+  # ---------- React static site ----------
+  - type: web
+    name: shopkit-client
+    runtime: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false # https://shopkit-api.onrender.com/api
+    routes:
+      # SPA fallback — without this, a refresh on any sub-path 404s.
+      - type: rewrite
+        source: /*
+        destination: /index.html
